@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-g
 
-OBJS=gluethread/glthread.o graph.o topologies.o
+OBJS=gluethread/glthread.o graph.o topologies.o net.o
 
 test: testapp.o $(OBJS)
 	$(CC) $(CFLAGS) testapp.o $(OBJS) -o test
@@ -18,7 +18,11 @@ graph.o: graph.c
 topologies.o: topologies.c 
 	$(CC) $(CFLAGS) -c -I . topologies.c -o topologies.o
 
+net.o: net.c 
+	$(CC) $(CFLAGS) -c -I . net.c -o net.o
+
 clean:
+	rm gluethread/glthread.o
 	rm *.o
 	rm test
     
