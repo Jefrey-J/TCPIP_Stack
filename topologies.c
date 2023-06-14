@@ -5,7 +5,9 @@
 */
 
 #include <stdio.h>
+#include <stdint.h>
 #include "graph.h"
+#include "utils.h"
 
 extern graph_t *create_new_graph(char *topology_name);
 extern node_t *create_graph_node(graph_t *graph, char *node_name); 
@@ -33,8 +35,9 @@ graph_t *build_first_topo() {
     node_set_intf_ip_address(R2_re, "eth0/3", "30.1.1.2", 24);
     node_set_intf_ip_address(R2_re, "eth0/5", "40.1.1.2", 24);
 
-    printf("R0_re ip address: %s\n", R0_re->node_nw_prop.lb_addr.ip);
-
+    unsigned int ip_32b = convert_ip_from_to_str_int("120.1.1.2"); 
+    char *ip_str; 
+    convert_ip_from_int_to_str(ip_32b, ip_str);
     return topo;
 }
 

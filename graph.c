@@ -21,8 +21,8 @@ node_t* create_graph_node(graph_t *graph, char* node_name) {
     node->node_name[NODE_NAME_SIZE - 1] = '\0';
 
     init_node_nw_prop(&node->node_nw_prop);
-    //init_glthread(&node->graph_glue);
-    //glthread_add_next(&graph->node_list, &node->graph_glue);
+    init_glthread(&node->graph_glue);
+    glthread_add_next(&graph->node_list, &node->graph_glue);
     return node;
 }
 
@@ -51,6 +51,10 @@ void insert_link_between_two_nodes(node_t *node1, node_t *node2, char *from_if_n
 
     init_intf_nw_prop(&link->intf1.intf_nw_props);
     init_intf_nw_prop(&link->intf2.intf_nw_props);
+
+    /* Assigning Random MAC Address to the interface */ 
+    interface_assign_mac_address(&link->intf1);
+    interface_assign_mac_address(&link->intf2);
 }
 
 void dump_graph(graph_t *graph){

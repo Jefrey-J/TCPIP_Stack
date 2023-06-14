@@ -1,6 +1,8 @@
 #include "graph.h"
 #include <memory.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 static unsigned int hash_code(void *ptr, unsigned int size) {
     unsigned int value = 0, i = 0; 
@@ -66,8 +68,66 @@ void dump_nw_graph(graph_t *graph) {
 
 void dump_node_nw_props(node_t *node) {
     printf("Node name: %s\n", node->node_name); 
-    printf("Is loopback address configured? %s\n", (node->node_nw_prop.is_lb_addr_config) ? "YES" : "NO"); 
+    printf("\tIs loopback address configured? %s\n", (node->node_nw_prop.is_lb_addr_config) ? "YES" : "NO"); 
     if(node->node_nw_prop.is_lb_addr_config) {
-        printf("Loopback address: %s\n", NODE_LO_ADDR(node));
+        printf("\tLoopback address: %s\n", NODE_LO_ADDR(node));
     }
+    interface_t *intf; 
+    for(int i = 0; i < MAX_INTF_PER_NODE; i++) {
+        intf = node->intf[i];
+        if(!intf) break;
+        dump_intf_nw_prop(intf);
+    }
+}
+
+void dump_intf_nw_prop(interface_t *interface) { 
+    printf("\tInterface name: %s\n", interface->if_name); 
+    printf("\tCost: %u\n", interface->link->cost); 
+    printf("\tIP Address: %s\n", IF_IP(interface));
+    printf("\tMask: %d\n", IF_MASK(interface));
+    printf("\tMAC Address: %hhu:%hhu:%hhu:%hhu:%hhu:%hhu\n", 
+            IF_MAC(interface)[0], IF_MAC(interface)[1],
+            IF_MAC(interface)[2], IF_MAC(interface)[3],
+            IF_MAC(interface)[4], IF_MAC(interface)[5]);
+}
+
+
+unsigned int convert_ip_from_to_str_int(char *ip_addr) {
+    char ip_val[4]; 
+
+    sscanf(ip_addr, "%hhu.%hhu.%hhu.%hhu", &ip_val[0], &ip_val[1], &ip_val[2], &ip_val[3]); 
+
+    return ip_val[0] << 24 | ip_val[1] << 16 | ip_val[2] << 8 | ip_val[3]; 
+}
+
+void convert_ip_from_int_to_str(unsigned int ip_addr, char *output_buffer) {
+    output_buffer = malloc(16 * sizeof(char));
+    sprintf(output_buffer, "%u.%u.%u.%u", (ip_addr >> 24) & 0xFF,
+                                          (ip_addr >> 16) & 0xFF,
+                                          (ip_addr >> 8) & 0xFF,
+                                          (ip_addr) & 0xFF);
+}
+
+interface_t *node_get_matching_subnet_interface(node_t *node, char *ip_addr) {
+    uint8_t mask;
+    char *subnet;
+    char *node_subnet;
+
+    sscanf(ip_addr, "%*[^/]/%hhu", &mask);
+
+    apply_mask(ip_addr, mask, &subnet);
+    
+    interface_t *intf = NULL;
+
+    for (int i = 0; i < MAX_INTF_PER_NODE; i++) {
+        intf = node->intf[i];
+        if(!intf) 
+            continue;
+        apply_mask(IF_IP(intf), IF_MASK(intf), &node_subnet);
+        if (strncmp(node_subnet, subnet, sizeof(node_subnet)/sizeof(node_subnet[0])) != 0) {
+            continue;
+        } 
+        return intf;
+    }
+    return NULL;
 }
