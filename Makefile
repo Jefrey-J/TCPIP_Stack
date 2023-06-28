@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-g
 LIBS = -lpthread -L ./CommandParser -lcli 
-OBJS=gluethread/glthread.o graph.o topologies.o net.o utils.o nwcli.o
+OBJS=gluethread/glthread.o graph.o topologies.o net.o utils.o nwcli.o comm.o
 
 test: testapp.o ${OBJS} CommandParser/libcli.a 
 	${CC} ${CFLAGS} testapp.o ${OBJS} -o test ${LIBS}
@@ -23,6 +23,9 @@ net.o: net.c
 
 utils.o: utils.c 
 	$(CC) $(CFLAGS) -c -I . utils.c -o utils.o
+
+comm.o: comm.c 
+	$(CC) $(CFLAGS) -c -I . comm.c -o comm.o
 
 CommandParser/libcli.a: 
 	(cd CommandParser; make)

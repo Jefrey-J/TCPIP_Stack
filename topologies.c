@@ -11,6 +11,7 @@
 
 extern graph_t *create_new_graph(char *topology_name);
 extern node_t *create_graph_node(graph_t *graph, char *node_name); 
+extern void network_start_pkt_receiver_thread(graph_t *topo); 
 
 graph_t *build_first_topo() {
     graph_t *topo = create_new_graph("Hello World Generic Graph"); 
@@ -35,9 +36,33 @@ graph_t *build_first_topo() {
     node_set_intf_ip_address(R2_re, "eth0/3", "30.1.1.2", 24);
     node_set_intf_ip_address(R2_re, "eth0/5", "40.1.1.2", 24);
 
-    unsigned int ip_32b = convert_ip_from_to_str_int("120.1.1.2"); 
-    char *ip_str; 
-    convert_ip_from_int_to_str(ip_32b, ip_str);
+    network_start_pkt_receiver_thread(topo); 
+
     return topo;
 }
 
+graph_t *linear_topo() {
+    graph_t *graph = create_new_graph("Linear graph"); 
+
+    node_t *H1 = create_graph_node(graph, "H1");
+    node_t *H2 = create_graph_node(graph, "H2");
+    node_t *H3 = create_graph_node(graph, "H3");
+
+    insert_link_between_two_nodes(H1, H2, "eth0/1", "eth0/2", 1); 
+    insert_link_between_two_nodes(H2, H3, "eth0/3", "eth0/4", 1); 
+
+    node_set_loopback_address(H1, "122.1.1.1");
+    node_set_intf_ip_address(H1, "eth0/1", "10.1.1.1", 24); 
+
+    node_set_loopback_address(H2, "122.1.1.2");
+    node_set_intf_ip_address(H2, "eth0/2", "10.1.1.2", 24); 
+    node_set_intf_ip_address(H2, "eth0/3", "20.1.1.2", 24); 
+
+    node_set_loopback_address(H3, "122.1.1.3");
+    node_set_intf_ip_address(H3, "eth0/4", "20.1.1.1", 24); 
+
+    network_start_pkt_receiver_thread(graph);
+
+    return graph;
+
+}
