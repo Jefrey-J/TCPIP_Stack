@@ -64,4 +64,5 @@ unsigned int convert_ip_from_to_str_int(char *ip_addr);
 void convert_ip_from_int_to_str(unsigned int ip_addr, char *output_buffer); 
 interface_t *node_get_matching_subnet_interface(node_t *node, char *ip_addr); 
 void interface_assign_mac_address(interface_t *interface);
+
 #endif /*__NET__*/
